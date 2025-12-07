@@ -55,24 +55,49 @@ async def process_data(message: types.Message):
             order_data = data.get("data", {})
             
             # 1. Пишем клиенту
-            await message.answer("✅ **Заявка принята!**\nМенеджер уже видит ваш расчет.")
+            await message.answer("✅ **Заявка принята!**\n\nВаш расчет передан менеджеру.\nОжидайте ответа в течение 5-10 минут.")
             
             # 2. Пишем ТЕБЕ (Админу)
             # Формируем список товаров
             items_list = ""
             for item in order_data.get('items', []):
-                items_list += f"▫️ {item['l']}x{item['w']}x{item['h']}см | {item['weight']}кг | {item['qty']}шт\n"
+                items_list += (
+                    f"📦 Box #{item['boxNumber']}: {item['dimensions']}\n"
+                    f"   Вес: {item['weight']}кг × {item['quantity']}шт = {item['totalWeight']}кг\n"
+                    f"   Объем: {item['totalVolume']}м³\n"
+                )
+
+            # Определяем метод доставки
+            delivery_icons = {
+                'air': '✈️ AIR',
+                'truck': '🚛 TRUCK', 
+                'sea': '🚢 SEA',
+                'custom': '⚙️ CUSTOM'
+            }
+            delivery_method = delivery_icons.get(order_data.get('deliveryMethod', 'custom'), '⚙️ CUSTOM')
+            
+            # Символ валюты
+            currency_symbols = {'USD': '$', 'CNY': '¥', 'RUB': '₽'}
+            currency = order_data.get('currency', 'USD')
+            symbol = currency_symbols.get(currency, '$')
 
             report = (
                 f"🔔 **НОВАЯ ЗАЯВКА!**\n\n"
-                f"👤 Клиент: @{message.from_user.username} ({message.from_user.full_name})\n"
-                f"💰 **ИТОГО: {order_data.get('totalCost', '0')}**\n"
-                f"📦 Вес: {order_data.get('totalWeight', '0')} кг\n"
-                f"🧊 Объем: {order_data.get('totalCbm', '0')} CBM\n\n"
-                f"📋 **Груз:**\n{items_list}"
+                f"👤 Клиент: @{message.from_user.username or 'Не указан'} ({message.from_user.full_name})\n"
+                f"💰 **ИТОГО: {symbol}{order_data.get('totalPrice', '0'):.2f} {currency}**\n\n"
+                f"📊 **Параметры:**\n"
+                f"📦 Общий вес: {order_data.get('totalWeight', '0'):.2f} кг\n"
+                f"🧊 Общий объем: {order_data.get('totalVolume', '0'):.3f} м³\n"
+                f"📐 Плотность: {order_data.get('density', '0'):.2f} kg/m³\n"
+                f"🚚 Доставка: {delivery_method}\n"
+                f"💵 Тариф: {symbol}{order_data.get('rate', '0')} per {order_data.get('rateType', 'kg').upper()}\n"
+                f"💱 Курс: 1 USD = {order_data.get('exchangeRate', 1)} {currency}\n\n"
+                f"📋 **Груз ({len(order_data.get('items', []))} коробок):**\n{items_list}\n"
+                f"📅 Дата: {order_data.get('date', 'Не указана')}"
             )
+            
             # Отправляем отчет на твой ID
-            await bot.send_message(chat_id=ADMIN_ID, text=report)
+            await bot.send_message(chat_id=ADMIN_ID, text=report, parse_mode="Markdown")
             
     except Exception as e:
         logging.error(f"Ошибка при обработке данных: {e}")
