@@ -3,7 +3,14 @@ import json
 import logging
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
-from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo
+from aiogram.types import ReplyKeyboardMarkup, KeyboardButton, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.fsm.context import FSMContext
+from aiogram.fsm.state import State, StatesGroup
+from aiogram.fsm.storage.memory import MemoryStorage
+
+# Состояния для ответов клиенту
+class ReplyStates(StatesGroup):
+    waiting_for_message = State()
 
 # --- ⚙️ ТВОИ НАСТРОЙКИ ---
 
@@ -20,7 +27,8 @@ WEB_APP_URL = "https://kikikiki2121.github.io/china-box-master/"
 
 logging.basicConfig(level=logging.INFO)
 bot = Bot(token=BOT_TOKEN)
-dp = Dispatcher()
+storage = MemoryStorage()
+dp = Dispatcher(storage=storage)
 
 # Команда /start - показывает кнопку
 @dp.message(Command("start"))
@@ -96,11 +104,114 @@ async def process_data(message: types.Message):
                 f"📅 Дата: {order_data.get('date', 'Не указана')}"
             )
             
-            # Отправляем отчет на твой ID
-            await bot.send_message(chat_id=ADMIN_ID, text=report, parse_mode="Markdown")
+            # Создаём inline кнопки для быстрых ответов
+            keyboard = InlineKeyboardMarkup(inline_keyboard=[
+                [
+                    InlineKeyboardButton(text="✅ Принять", callback_data=f"accept_{message.from_user.id}"),
+                    InlineKeyboardButton(text="❌ Отклонить", callback_data=f"reject_{message.from_user.id}")
+                ],
+                [
+                    InlineKeyboardButton(text="📝 Написать клиенту", callback_data=f"reply_{message.from_user.id}")
+                ]
+            ])
+            
+            # Отправляем отчет на твой ID с кнопками
+            await bot.send_message(
+                chat_id=ADMIN_ID, 
+                text=report, 
+                parse_mode="Markdown",
+                reply_markup=keyboard
+            )
             
     except Exception as e:
         logging.error(f"Ошибка при обработке данных: {e}")
+
+# Обработчики inline кнопок
+@dp.callback_query(F.data.startswith("accept_"))
+async def process_accept(callback: types.CallbackQuery):
+    client_id = int(callback.data.split("_")[1])
+    
+    # Отправляем клиенту подтверждение
+    await bot.send_message(
+        chat_id=client_id,
+        text="✅ **Заявка принята в работу!**\n\n"
+             "Ваш заказ обрабатывается.\n"
+             "Скоро с вами свяжется менеджер для уточнения деталей."
+    )
+    
+    # Уведомляем админа
+    await callback.answer("✅ Заявка принята! Клиент уведомлен.")
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.message.edit_text(
+        callback.message.text + "\n\n✅ **СТАТУС: ПРИНЯТО**",
+        parse_mode="Markdown"
+    )
+
+@dp.callback_query(F.data.startswith("reject_"))
+async def process_reject(callback: types.CallbackQuery):
+    client_id = int(callback.data.split("_")[1])
+    
+    # Отправляем клиенту отказ
+    await bot.send_message(
+        chat_id=client_id,
+        text="❌ **К сожалению, мы не можем принять эту заявку.**\n\n"
+             "Попробуйте изменить параметры и отправить новый расчет.\n"
+             "Или свяжитесь с менеджером для уточнения деталей."
+    )
+    
+    # Уведомляем админа
+    await callback.answer("❌ Заявка отклонена. Клиент уведомлен.")
+    await callback.message.edit_reply_markup(reply_markup=None)
+    await callback.message.edit_text(
+        callback.message.text + "\n\n❌ **СТАТУС: ОТКЛОНЕНО**",
+        parse_mode="Markdown"
+    )
+
+@dp.callback_query(F.data.startswith("reply_"))
+async def process_reply_button(callback: types.CallbackQuery, state: FSMContext):
+    client_id = int(callback.data.split("_")[1])
+    
+    # Сохраняем ID клиента в состояние
+    await state.update_data(client_id=client_id)
+    await state.set_state(ReplyStates.waiting_for_message)
+    
+    # Просим админа написать сообщение
+    await callback.message.answer(
+        "📝 **Напишите сообщение для клиента:**\n\n"
+        "Ваше следующее сообщение будет отправлено клиенту.\n"
+        "Для отмены отправьте /cancel"
+    )
+    await callback.answer()
+
+# Обработчик получения текста от админа
+@dp.message(ReplyStates.waiting_for_message)
+async def process_admin_message(message: types.Message, state: FSMContext):
+    if message.text == "/cancel":
+        await state.clear()
+        await message.answer("❌ Отправка сообщения отменена.")
+        return
+    
+    # Получаем ID клиента из состояния
+    data = await state.get_data()
+    client_id = data.get('client_id')
+    
+    if not client_id:
+        await message.answer("❌ Ошибка: не найден ID клиента.")
+        await state.clear()
+        return
+    
+    # Отправляем сообщение клиенту
+    try:
+        await bot.send_message(
+            chat_id=client_id,
+            text=f"💬 **Сообщение от менеджера:**\n\n{message.text}"
+        )
+        await message.answer(f"✅ Сообщение отправлено клиенту!")
+    except Exception as e:
+        await message.answer(f"❌ Ошибка отправки: {e}")
+    
+    # Очищаем состояние
+    await state.clear()
 
 async def main():
     print("🤖 Бот China Box Master ЗАПУЩЕН! Иди в Телеграм.")
