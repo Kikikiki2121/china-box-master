@@ -3,170 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>China Box Master</title>
+    <title>China Box Master v5.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-    <!-- Warning Tape Animation -->
-    <div class="warning-tape warning-tape-top"></div>
-    
-    <div class="container">
+    <div class="app-container">
         <!-- Header -->
-        <header class="header">
-            <div class="tech-label glow">CARGO CALCULATOR v2.1</div>
-            <h1 class="title glitch" data-text="CHINA BOX MASTER">CHINA BOX MASTER</h1>
-            <div class="tech-label">CYBER LOGISTICS SYSTEM</div>
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo">
+                    <span class="logo-icon">📦</span>
+                    <div class="logo-text">
+                        <h1>CHB MASTER</h1>
+                        <span class="version">v5.0 Neo-Logistics</span>
+                    </div>
+                </div>
+                <button class="btn-history" id="btnHistory">
+                    <span class="icon">📜</span>
+                    <span class="text">HISTORY</span>
+                </button>
+            </div>
         </header>
 
-        <!-- Input Section -->
-        <section class="input-section">
-            <div class="section-title">
-                <span class="section-number pulse">01</span>
-                INPUT PARAMETERS
-            </div>
-
-            <!-- Container Slots Design -->
-            <div class="container-slots">
-                <div class="slot">
-                    <label for="length">ДЛИНА (см)</label>
-                    <input type="number" id="length" placeholder="0" step="0.1" min="0">
-                    <div class="slot-border"></div>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Rate & Currency Section -->
+            <section class="glass-card rate-section">
+                <h2 class="section-title">
+                    <span class="icon">💱</span>
+                    RATE & CURRENCY
+                </h2>
+                
+                <div class="currency-selector">
+                    <button class="currency-btn active" data-currency="USD">
+                        <span class="symbol">$</span>
+                        <span class="code">USD</span>
+                    </button>
+                    <button class="currency-btn" data-currency="CNY">
+                        <span class="symbol">¥</span>
+                        <span class="code">CNY</span>
+                    </button>
+                    <button class="currency-btn" data-currency="RUB">
+                        <span class="symbol">₽</span>
+                        <span class="code">RUB</span>
+                    </button>
                 </div>
 
-                <div class="slot">
-                    <label for="width">ШИРИНА (см)</label>
-                    <input type="number" id="width" placeholder="0" step="0.1" min="0">
-                    <div class="slot-border"></div>
+                <div class="exchange-rate-block" id="exchangeRateBlock" style="display: none;">
+                    <label for="exchangeRate">Exchange Rate (1 USD = ? <span id="targetCurrency">CNY</span>)</label>
+                    <input type="number" id="exchangeRate" placeholder="7.2" step="0.01" min="0">
                 </div>
 
-                <div class="slot">
-                    <label for="height">ВЫСОТА (см)</label>
-                    <input type="number" id="height" placeholder="0" step="0.1" min="0">
-                    <div class="slot-border"></div>
+                <div class="delivery-presets">
+                    <h3 class="preset-title">Delivery Method</h3>
+                    <div class="preset-buttons">
+                        <button class="preset-btn" data-type="air">
+                            <span class="emoji">✈️</span>
+                            <span class="name">AIR</span>
+                            <span class="rate">$5.5/kg</span>
+                        </button>
+                        <button class="preset-btn" data-type="truck">
+                            <span class="emoji">🚛</span>
+                            <span class="name">TRUCK</span>
+                            <span class="rate">$3.8/kg</span>
+                        </button>
+                        <button class="preset-btn" data-type="sea">
+                            <span class="emoji">🚢</span>
+                            <span class="name">SEA</span>
+                            <span class="rate">$280/CBM</span>
+                        </button>
+                    </div>
                 </div>
 
-                <div class="slot">
-                    <label for="weight">ВЕС ОДНОЙ КОРОБКИ (кг)</label>
-                    <input type="number" id="weight" placeholder="0" step="0.1" min="0">
-                    <div class="slot-border"></div>
+                <div class="custom-rate">
+                    <label for="customRate">Custom Rate</label>
+                    <div class="rate-input-group">
+                        <input type="number" id="customRate" placeholder="0.00" step="0.01" min="0">
+                        <select id="rateType">
+                            <option value="kg">per KG</option>
+                            <option value="cbm">per CBM</option>
+                        </select>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Boxes Section -->
+            <section class="glass-card boxes-section">
+                <div class="section-header">
+                    <h2 class="section-title">
+                        <span class="icon">📋</span>
+                        CARGO ITEMS
+                    </h2>
+                    <button class="btn-add-box" id="btnAddBox">
+                        <span class="icon">+</span>
+                        ADD BOX
+                    </button>
                 </div>
 
-                <div class="slot">
-                    <label for="quantity">КОЛИЧЕСТВО КОРОБОК (шт)</label>
-                    <input type="number" id="quantity" placeholder="0" step="1" min="0">
-                    <div class="slot-border"></div>
+                <div class="boxes-container" id="boxesContainer">
+                    <!-- Boxes will be added dynamically -->
                 </div>
-            </div>
+            </section>
 
-            <!-- Big Pulsing Calculate Button -->
-            <button class="calculate-btn-mega" id="calculateBtn">
-                <span class="btn-icon">⚡</span>
-                <span class="btn-text">CALCULATE</span>
-                <span class="btn-icon">⚡</span>
+            <!-- Calculate Button -->
+            <button class="btn-calculate" id="btnCalculate">
+                <span class="icon">⚡</span>
+                <span class="text">CALCULATE MANIFEST</span>
+                <span class="icon">⚡</span>
             </button>
-        </section>
+        </main>
     </div>
 
-    <!-- Warning Tape Bottom -->
-    <div class="warning-tape warning-tape-bottom"></div>
+    <!-- History Modal -->
+    <div class="modal-overlay" id="historyModal">
+        <div class="modal-content history-modal">
+            <div class="modal-header">
+                <h2>📜 CALCULATION HISTORY</h2>
+                <button class="btn-close" id="btnCloseHistory">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="history-list" id="historyList">
+                    <!-- History items will be added here -->
+                </div>
+            </div>
+        </div>
+    </div>
 
-    <!-- Modal Overlay -->
-    <div class="modal-overlay" id="modalOverlay">
-        <!-- Packing List Check -->
-        <div class="packing-list" id="packingList">
-            <!-- Close Button -->
-            <button class="close-btn" id="closeBtn">✕</button>
-
-            <!-- Check Header -->
-            <div class="check-header">
-                <div class="logo">CHB MASTER</div>
-                <div class="check-date" id="checkDate"></div>
-                <div class="check-number">CARGO REPORT #<span id="reportNumber"></span></div>
+    <!-- Manifest Modal -->
+    <div class="modal-overlay" id="manifestModal">
+        <div class="modal-content manifest-modal">
+            <button class="btn-close-manifest" id="btnCloseManifest">✕</button>
+            
+            <div class="manifest-header">
+                <div class="manifest-logo">
+                    <span class="logo-icon">📦</span>
+                    <h1>CHB MASTER</h1>
+                </div>
+                <div class="manifest-date" id="manifestDate"></div>
+                <div class="manifest-id">MANIFEST #<span id="manifestId"></span></div>
             </div>
 
-            <!-- Separator -->
-            <div class="separator"></div>
+            <div class="manifest-divider"></div>
 
-            <!-- Check Content -->
-            <div class="check-content">
-                <div class="check-row">
-                    <span class="check-label">DIMENSIONS (L×W×H):</span>
-                    <span class="check-value" id="checkDimensions">-</span>
-                </div>
-                <div class="check-row">
-                    <span class="check-label">SINGLE BOX VOLUME:</span>
-                    <span class="check-value" id="checkSingleCBM">-</span>
-                </div>
-                <div class="check-row">
-                    <span class="check-label">QUANTITY:</span>
-                    <span class="check-value" id="checkQuantity">-</span>
-                </div>
-                <div class="separator"></div>
-                <div class="check-row total">
-                    <span class="check-label">TOTAL VOLUME (CBM):</span>
-                    <span class="check-value" id="checkTotalCBM">-</span>
-                </div>
-                <div class="check-row total">
-                    <span class="check-label">TOTAL WEIGHT:</span>
-                    <span class="check-value" id="checkTotalWeight">-</span>
-                </div>
-                <div class="check-row total">
-                    <span class="check-label">DENSITY:</span>
-                    <span class="check-value" id="checkDensity">-</span>
+            <div class="manifest-items">
+                <h3>CARGO ITEMS</h3>
+                <div class="items-list" id="manifestItemsList">
+                    <!-- Items will be listed here -->
                 </div>
             </div>
 
-            <!-- Separator -->
-            <div class="separator"></div>
+            <div class="manifest-divider"></div>
 
-            <!-- Cargo Type Stamp -->
-            <div class="cargo-stamp" id="cargoStamp">
-                <div class="stamp-text" id="stampText">STANDBY</div>
+            <div class="manifest-totals">
+                <div class="total-row">
+                    <span class="label">TOTAL WEIGHT:</span>
+                    <span class="value" id="manifestTotalWeight">0.00 kg</span>
+                </div>
+                <div class="total-row">
+                    <span class="label">TOTAL VOLUME:</span>
+                    <span class="value" id="manifestTotalCBM">0.000 m³</span>
+                </div>
+                <div class="total-row">
+                    <span class="label">DENSITY:</span>
+                    <span class="value" id="manifestDensity">0.00 kg/m³</span>
+                </div>
+                <div class="total-row highlight">
+                    <span class="label">DELIVERY METHOD:</span>
+                    <span class="value" id="manifestMethod">-</span>
+                </div>
             </div>
 
-            <!-- Barcode -->
-            <div class="barcode">
+            <div class="manifest-divider"></div>
+
+            <div class="manifest-price">
+                <div class="price-label">TOTAL COST</div>
+                <div class="price-value" id="manifestPrice">$0.00</div>
+                <div class="price-currency" id="manifestCurrency">USD</div>
+            </div>
+
+            <div class="manifest-barcode">
                 <svg viewBox="0 0 200 50">
-                    <rect x="5" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="10" y="5" width="4" height="40" fill="#000"/>
-                    <rect x="17" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="22" y="5" width="6" height="40" fill="#000"/>
-                    <rect x="31" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="36" y="5" width="4" height="40" fill="#000"/>
-                    <rect x="43" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="48" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="53" y="5" width="6" height="40" fill="#000"/>
-                    <rect x="62" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="67" y="5" width="4" height="40" fill="#000"/>
-                    <rect x="74" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="79" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="84" y="5" width="6" height="40" fill="#000"/>
-                    <rect x="93" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="98" y="5" width="4" height="40" fill="#000"/>
-                    <rect x="105" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="110" y="5" width="6" height="40" fill="#000"/>
-                    <rect x="119" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="124" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="129" y="5" width="4" height="40" fill="#000"/>
-                    <rect x="136" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="141" y="5" width="6" height="40" fill="#000"/>
-                    <rect x="150" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="155" y="5" width="4" height="40" fill="#000"/>
-                    <rect x="162" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="167" y="5" width="6" height="40" fill="#000"/>
-                    <rect x="176" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="181" y="5" width="4" height="40" fill="#000"/>
-                    <rect x="188" y="5" width="2" height="40" fill="#000"/>
-                    <rect x="193" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="5" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="10" y="5" width="4" height="40" fill="#00f2ea"/>
+                    <rect x="17" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="22" y="5" width="6" height="40" fill="#00f2ea"/>
+                    <rect x="31" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="36" y="5" width="4" height="40" fill="#00f2ea"/>
+                    <rect x="43" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="48" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="53" y="5" width="6" height="40" fill="#00f2ea"/>
+                    <rect x="62" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="67" y="5" width="4" height="40" fill="#00f2ea"/>
+                    <rect x="74" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="79" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="84" y="5" width="6" height="40" fill="#00f2ea"/>
+                    <rect x="93" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="98" y="5" width="4" height="40" fill="#00f2ea"/>
+                    <rect x="105" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="110" y="5" width="6" height="40" fill="#00f2ea"/>
+                    <rect x="119" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="124" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="129" y="5" width="4" height="40" fill="#00f2ea"/>
+                    <rect x="136" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="141" y="5" width="6" height="40" fill="#00f2ea"/>
+                    <rect x="150" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="155" y="5" width="4" height="40" fill="#00f2ea"/>
+                    <rect x="162" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="167" y="5" width="6" height="40" fill="#00f2ea"/>
+                    <rect x="176" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="181" y="5" width="4" height="40" fill="#00f2ea"/>
+                    <rect x="188" y="5" width="2" height="40" fill="#00f2ea"/>
+                    <rect x="193" y="5" width="2" height="40" fill="#00f2ea"/>
                 </svg>
-                <div class="barcode-number" id="barcodeNumber">123456789012</div>
             </div>
 
-            <!-- Share Button -->
-            <button class="share-btn" id="shareBtn">
-                <span class="share-icon">📤</span>
-                ОТПРАВИТЬ КЛИЕНТУ
+            <button class="btn-share-manifest" id="btnShareManifest">
+                <span class="icon">📤</span>
+                SHARE MANIFEST
             </button>
         </div>
     </div>
