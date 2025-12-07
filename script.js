@@ -372,63 +372,59 @@ manifestModal.addEventListener('click', (e) => {
     }
 });
 
-// Share Manifest
+// Share Manifest (Send Order)
 btnShareManifest.addEventListener('click', shareManifest);
 
-async function shareManifest() {
+function shareManifest() {
     const result = window.currentManifest;
-    if (!result) return;
-    
-    const symbol = currencySymbols[result.currency];
-    let methodText = 'Custom';
-    if (result.deliveryMethod && deliveryPresets[result.deliveryMethod]) {
-        const preset = deliveryPresets[result.deliveryMethod];
-        methodText = `${preset.emoji} ${preset.name}`;
+    if (!result) {
+        alert('⚠️ Нет данных для отправки!');
+        return;
     }
     
-    const itemsText = result.items.map((item, i) => 
-        `📦 BOX #${i + 1}: ${item.dimensions}\n   ${item.weight}kg × ${item.quantity}pcs = ${item.totalWeight}kg, ${item.totalCBM}m³`
-    ).join('\n\n');
+    // Подготовка данных заявки
+    const orderData = {
+        totalWeight: result.totalWeight,
+        totalVolume: result.totalCBM,
+        totalPrice: result.finalPrice,
+        currency: result.currency,
+        density: result.density,
+        deliveryMethod: result.deliveryMethod || 'custom',
+        rate: result.rate,
+        rateType: result.rateType,
+        exchangeRate: result.exchangeRate,
+        items: result.items.map((item, index) => ({
+            boxNumber: index + 1,
+            dimensions: item.dimensions,
+            weight: item.weight,
+            quantity: item.quantity,
+            totalWeight: item.totalWeight,
+            totalVolume: item.totalCBM
+        })),
+        timestamp: result.timestamp,
+        date: new Date(result.timestamp).toLocaleString('ru-RU')
+    };
     
-    const shareText = `
-📦 CARGO MANIFEST - CHB MASTER
-
-${itemsText}
-
-━━━━━━━━━━━━━━━━━━━━
-⚖️ Total Weight: ${result.totalWeight.toFixed(2)} kg
-📊 Total Volume: ${result.totalCBM.toFixed(3)} CBM
-📈 Density: ${result.density.toFixed(2)} kg/m³
-
-🚚 Delivery: ${methodText}
-💰 Rate: $${result.rate}/${result.rateType.toUpperCase()}
-
-━━━━━━━━━━━━━━━━━━━━
-💵 TOTAL COST: ${symbol}${result.finalPrice.toFixed(2)} ${result.currency}
-
-━━━━━━━━━━━━━━━━━━━━
-🚢 China Box Master v5.0
-Neo-Logistics Terminal
-`.trim();
-
-    try {
-        if (navigator.share) {
-            await navigator.share({
-                title: '📦 Cargo Manifest - CHB Master',
-                text: shareText
-            });
-            
-            if (tg?.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
-        } else {
-            await copyToClipboard(shareText);
+    if (tg && tg.sendData) {
+        const data = JSON.stringify({
+            action: "order",
+            data: orderData
+        });
+        
+        // Haptic feedback
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred('success');
         }
-    } catch (err) {
-        if (err.name !== 'AbortError') {
-            console.error('Share error:', err);
-            await copyToClipboard(shareText);
-        }
+        
+        // Отправить данные боту
+        tg.sendData(data);
+        
+        // Закрыть приложение
+        tg.close();
+    } else {
+        // Fallback для тестирования вне Telegram
+        console.log('Order data:', orderData);
+        alert('🚀 Заявка отправлена!\n\nИтого: ' + currencySymbols[result.currency] + result.finalPrice.toFixed(2) + ' ' + result.currency + '\n\nЭта функция работает только в Telegram Bot.');
     }
 }
 
@@ -563,6 +559,92 @@ historyModal.addEventListener('click', (e) => {
 // Prevent zoom on iOS
 document.addEventListener('gesturestart', (e) => {
     e.preventDefault();
+});
+
+// Telegram Action Buttons
+const btnGetAddress = document.getElementById('btnGetAddress');
+const btnSendOrder = document.getElementById('btnSendOrder');
+
+// Get Warehouse Address Handler
+btnGetAddress.addEventListener('click', () => {
+    if (tg && tg.sendData) {
+        const data = JSON.stringify({ action: "get_address" });
+        
+        // Haptic feedback
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('medium');
+        }
+        
+        // Send data to bot
+        tg.sendData(data);
+        
+        // Close the web app
+        tg.close();
+    } else {
+        // Fallback for testing outside Telegram
+        console.log('Telegram WebApp not available');
+        alert('📍 Request sent: GET WAREHOUSE ADDRESS\n\nThis feature works only in Telegram Bot.');
+    }
+});
+
+// Send Order to Manager Handler
+btnSendOrder.addEventListener('click', () => {
+    // Validate that we have calculated data
+    if (!window.currentManifest) {
+        alert('⚠️ Please calculate your order first!\n\nClick "CALCULATE MANIFEST" button to create an order.');
+        
+        if (tg?.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred('error');
+        }
+        return;
+    }
+    
+    const manifest = window.currentManifest;
+    
+    // Prepare order data
+    const orderData = {
+        totalWeight: manifest.totalWeight,
+        totalVolume: manifest.totalCBM,
+        totalPrice: manifest.finalPrice,
+        currency: manifest.currency,
+        density: manifest.density,
+        deliveryMethod: manifest.deliveryMethod || 'custom',
+        rate: manifest.rate,
+        rateType: manifest.rateType,
+        exchangeRate: manifest.exchangeRate,
+        items: manifest.items.map((item, index) => ({
+            boxNumber: index + 1,
+            dimensions: item.dimensions,
+            weight: item.weight,
+            quantity: item.quantity,
+            totalWeight: item.totalWeight,
+            totalVolume: item.totalCBM
+        })),
+        timestamp: manifest.timestamp,
+        date: new Date(manifest.timestamp).toLocaleString('ru-RU')
+    };
+    
+    if (tg && tg.sendData) {
+        const data = JSON.stringify({
+            action: "order",
+            data: orderData
+        });
+        
+        // Haptic feedback
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.notificationOccurred('success');
+        }
+        
+        // Send data to bot
+        tg.sendData(data);
+        
+        // Close the web app
+        tg.close();
+    } else {
+        // Fallback for testing outside Telegram
+        console.log('Order data:', orderData);
+        alert('🚀 Order sent to manager!\n\nTotal: ' + currencySymbols[manifest.currency] + manifest.finalPrice.toFixed(2) + ' ' + manifest.currency + '\n\nThis feature works only in Telegram Bot.');
+    }
 });
 
 // Initialize console log

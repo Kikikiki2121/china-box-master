@@ -16,10 +16,12 @@
         <header class="app-header">
             <div class="header-content">
                 <div class="logo">
-                    <span class="logo-icon">📦</span>
+                    <div class="logo-container">
+                        <span class="logo-icon">📦</span>
+                    </div>
                     <div class="logo-text">
-                        <h1>CHB MASTER</h1>
-                        <span class="version">v5.0 Neo-Logistics</span>
+                        <h1>中国物流 MASTER</h1>
+                        <span class="version">China Premium Logistics</span>
                     </div>
                 </div>
                 <button class="btn-history" id="btnHistory">
@@ -222,10 +224,22 @@
             </div>
 
             <button class="btn-share-manifest" id="btnShareManifest">
-                <span class="icon">📤</span>
-                SHARE MANIFEST
+                <span class="icon">🚀</span>
+                ОТПРАВИТЬ ЗАЯВКУ
             </button>
         </div>
+    </div>
+
+    <!-- Telegram Action Buttons -->
+    <div class="telegram-actions">
+        <button class="btn-action btn-action-outline" id="btnGetAddress">
+            <span class="icon">📍</span>
+            <span class="text">GET WAREHOUSE ADDRESS</span>
+        </button>
+        <button class="btn-action btn-action-solid" id="btnSendOrder">
+            <span class="icon">🚀</span>
+            <span class="text">SEND ORDER TO MANAGER</span>
+        </button>
     </div>
 
     <script src="script.js"></script>
