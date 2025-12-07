@@ -32,7 +32,8 @@ dp = Dispatcher(storage=storage)
 
 # Команда /start - показывает кнопку
 @dp.message(Command("start"))
-async def cmd_start(message: types.Message):
+async def cmd_start(message: types.Message, state: FSMContext):
+    await state.clear()  # Очищаем любое состояние
     keyboard = ReplyKeyboardMarkup(
         keyboard=[
             [KeyboardButton(text="📱 Открыть China Box Master", web_app=WebAppInfo(url=WEB_APP_URL))]
@@ -40,6 +41,12 @@ async def cmd_start(message: types.Message):
         resize_keyboard=True
     )
     await message.answer("Привет! Логистический терминал готов к работе. Жми кнопку 👇", reply_markup=keyboard)
+
+# Команда /cancel
+@dp.message(Command("cancel"))
+async def cmd_cancel(message: types.Message, state: FSMContext):
+    await state.clear()
+    await message.answer("❌ Действие отменено.")
 
 # Ловим данные из приложения
 @dp.message(F.content_type == "web_app_data")
