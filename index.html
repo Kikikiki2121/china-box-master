@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>China Box Master</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+</head>
+<body>
+    <!-- Warning Tape Animation -->
+    <div class="warning-tape warning-tape-top"></div>
+    
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="tech-label glow">CARGO CALCULATOR v2.1</div>
+            <h1 class="title glitch" data-text="CHINA BOX MASTER">CHINA BOX MASTER</h1>
+            <div class="tech-label">CYBER LOGISTICS SYSTEM</div>
+        </header>
+
+        <!-- Input Section -->
+        <section class="input-section">
+            <div class="section-title">
+                <span class="section-number pulse">01</span>
+                INPUT PARAMETERS
+            </div>
+
+            <!-- Container Slots Design -->
+            <div class="container-slots">
+                <div class="slot">
+                    <label for="length">ДЛИНА (см)</label>
+                    <input type="number" id="length" placeholder="0" step="0.1" min="0">
+                    <div class="slot-border"></div>
+                </div>
+
+                <div class="slot">
+                    <label for="width">ШИРИНА (см)</label>
+                    <input type="number" id="width" placeholder="0" step="0.1" min="0">
+                    <div class="slot-border"></div>
+                </div>
+
+                <div class="slot">
+                    <label for="height">ВЫСОТА (см)</label>
+                    <input type="number" id="height" placeholder="0" step="0.1" min="0">
+                    <div class="slot-border"></div>
+                </div>
+
+                <div class="slot">
+                    <label for="weight">ВЕС ОДНОЙ КОРОБКИ (кг)</label>
+                    <input type="number" id="weight" placeholder="0" step="0.1" min="0">
+                    <div class="slot-border"></div>
+                </div>
+
+                <div class="slot">
+                    <label for="quantity">КОЛИЧЕСТВО КОРОБОК (шт)</label>
+                    <input type="number" id="quantity" placeholder="0" step="1" min="0">
+                    <div class="slot-border"></div>
+                </div>
+            </div>
+
+            <!-- Big Pulsing Calculate Button -->
+            <button class="calculate-btn-mega" id="calculateBtn">
+                <span class="btn-icon">⚡</span>
+                <span class="btn-text">CALCULATE</span>
+                <span class="btn-icon">⚡</span>
+            </button>
+        </section>
+    </div>
+
+    <!-- Warning Tape Bottom -->
+    <div class="warning-tape warning-tape-bottom"></div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay" id="modalOverlay">
+        <!-- Packing List Check -->
+        <div class="packing-list" id="packingList">
+            <!-- Close Button -->
+            <button class="close-btn" id="closeBtn">✕</button>
+
+            <!-- Check Header -->
+            <div class="check-header">
+                <div class="logo">CHB MASTER</div>
+                <div class="check-date" id="checkDate"></div>
+                <div class="check-number">CARGO REPORT #<span id="reportNumber"></span></div>
+            </div>
+
+            <!-- Separator -->
+            <div class="separator"></div>
+
+            <!-- Check Content -->
+            <div class="check-content">
+                <div class="check-row">
+                    <span class="check-label">DIMENSIONS (L×W×H):</span>
+                    <span class="check-value" id="checkDimensions">-</span>
+                </div>
+                <div class="check-row">
+                    <span class="check-label">SINGLE BOX VOLUME:</span>
+                    <span class="check-value" id="checkSingleCBM">-</span>
+                </div>
+                <div class="check-row">
+                    <span class="check-label">QUANTITY:</span>
+                    <span class="check-value" id="checkQuantity">-</span>
+                </div>
+                <div class="separator"></div>
+                <div class="check-row total">
+                    <span class="check-label">TOTAL VOLUME (CBM):</span>
+                    <span class="check-value" id="checkTotalCBM">-</span>
+                </div>
+                <div class="check-row total">
+                    <span class="check-label">TOTAL WEIGHT:</span>
+                    <span class="check-value" id="checkTotalWeight">-</span>
+                </div>
+                <div class="check-row total">
+                    <span class="check-label">DENSITY:</span>
+                    <span class="check-value" id="checkDensity">-</span>
+                </div>
+            </div>
+
+            <!-- Separator -->
+            <div class="separator"></div>
+
+            <!-- Cargo Type Stamp -->
+            <div class="cargo-stamp" id="cargoStamp">
+                <div class="stamp-text" id="stampText">STANDBY</div>
+            </div>
+
+            <!-- Barcode -->
+            <div class="barcode">
+                <svg viewBox="0 0 200 50">
+                    <rect x="5" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="10" y="5" width="4" height="40" fill="#000"/>
+                    <rect x="17" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="22" y="5" width="6" height="40" fill="#000"/>
+                    <rect x="31" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="36" y="5" width="4" height="40" fill="#000"/>
+                    <rect x="43" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="48" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="53" y="5" width="6" height="40" fill="#000"/>
+                    <rect x="62" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="67" y="5" width="4" height="40" fill="#000"/>
+                    <rect x="74" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="79" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="84" y="5" width="6" height="40" fill="#000"/>
+                    <rect x="93" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="98" y="5" width="4" height="40" fill="#000"/>
+                    <rect x="105" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="110" y="5" width="6" height="40" fill="#000"/>
+                    <rect x="119" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="124" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="129" y="5" width="4" height="40" fill="#000"/>
+                    <rect x="136" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="141" y="5" width="6" height="40" fill="#000"/>
+                    <rect x="150" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="155" y="5" width="4" height="40" fill="#000"/>
+                    <rect x="162" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="167" y="5" width="6" height="40" fill="#000"/>
+                    <rect x="176" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="181" y="5" width="4" height="40" fill="#000"/>
+                    <rect x="188" y="5" width="2" height="40" fill="#000"/>
+                    <rect x="193" y="5" width="2" height="40" fill="#000"/>
+                </svg>
+                <div class="barcode-number" id="barcodeNumber">123456789012</div>
+            </div>
+
+            <!-- Share Button -->
+            <button class="share-btn" id="shareBtn">
+                <span class="share-icon">📤</span>
+                ОТПРАВИТЬ КЛИЕНТУ
+            </button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
