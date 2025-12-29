@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Shadow Pro | Ultimate Detailing</title>
+    
+    <style>
+        /* --- CORE VARIABLES --- */
+        :root {
+            /* Palette inspired by iPad Pro Dark Mode */
+            --bg-dark: #000000;
+            --bg-panel: #161617;
+            --text-light: #f5f5f7;
+            --text-grey: #86868b;
+            --accent: #2997ff; /* Apple "Pro" Blue */
+            
+            /* Palette inspired by iPhone Buy Light Mode */
+            --bg-light: #f5f5f7;
+            --bg-white: #ffffff;
+            --text-dark: #1d1d1f;
+            
+            --font-main: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+            --radius: 24px;
+            --container: 1080px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: var(--font-main);
+            overflow-x: hidden;
+            background: var(--bg-dark);
+            color: var(--text-light);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        a { text-decoration: none; color: inherit; }
+        
+        /* --- UTILS --- */
+        .container { max-width: var(--container); margin: 0 auto; padding: 0 20px; }
+        .flex-center { display: flex; justify-content: center; align-items: center; }
+        .text-gradient {
+            background: linear-gradient(135deg, #fff 0%, #888 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .pro-badge {
+            border: 1px solid #424245;
+            color: #86868b;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        /* --- HEADER (Sticky & Glass) --- */
+        header {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            background: rgba(0,0,0,0.8); backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .nav-inner { height: 52px; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .logo { font-weight: 600; font-size: 14px; letter-spacing: -0.01em; }
+        .btn-buy {
+            background: var(--accent); color: #fff; padding: 6px 16px; border-radius: 20px;
+            font-weight: 500; transition: 0.3s;
+        }
+        .btn-buy:hover { background: #0077ed; }
+
+        /* --- HERO (Dark Mode - iPad Style) --- */
+        .hero {
+            height: 90vh;
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            text-align: center;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #000 70%);
+            position: relative; overflow: hidden;
+        }
+        .hero h1 {
+            font-size: 86px; line-height: 1.05; font-weight: 700; letter-spacing: -0.02em;
+            margin-bottom: 20px; opacity: 0; animation: fadeUp 1s forwards 0.2s;
+        }
+        .hero p {
+            font-size: 28px; color: var(--text-grey); max-width: 600px;
+            margin-bottom: 40px; opacity: 0; animation: fadeUp 1s forwards 0.4s;
+        }
+        .hero-img-container {
+            width: 80%; height: 50vh;
+            background: url('https://images.unsplash.com/photo-1503376763036-066120622c74?q=80&w=2070&auto=format&fit=crop') center/contain no-repeat;
+            opacity: 0; animation: zoomIn 1.5s forwards 0.6s;
+        }
+
+        /* --- BENTO GRID (Tech Specs) --- */
+        .bento-section { padding: 120px 0; background: #000; }
+        .section-head { font-size: 56px; font-weight: 700; margin-bottom: 60px; text-align: center; }
+        
+        .bento-grid {
+            display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
+            grid-template-rows: 400px 400px;
+        }
+        .bento-card {
+            background: var(--bg-panel); border-radius: 30px; padding: 40px;
+            position: relative; overflow: hidden;
+            display: flex; flex-direction: column; justify-content: space-between;
+            transition: transform 0.4s ease;
+        }
+        .bento-card:hover { transform: scale(1.02); }
+        
+        .card-bg {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; opacity: 0.4; z-index: 1; transition: 0.5s;
+        }
+        .bento-card:hover .card-bg { opacity: 0.6; transform: scale(1.05); }
+        .card-content { position: relative; z-index: 2; }
+        
+        .card-super { font-size: 64px; font-weight: 700; background: linear-gradient(90deg, #a1c4fd, #c2e9fb); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .card-title { font-size: 28px; font-weight: 600; margin-top: 10px; }
+        .card-sub { font-size: 17px; color: var(--text-grey); margin-top: 10px; }
+
+        .span-2 { grid-column: span 2; }
+        .dark-text { color: #000; } /* For light cards */
+
+        /* --- CONFIGURATOR (Light Mode - iPhone Buy Style) --- */
+        .config-section {
+            background: var(--bg-light); color: var(--text-dark);
+            padding: 100px 0; border-top-left-radius: 40px; border-top-right-radius: 40px;
+        }
+        .config-layout { display: grid; grid-template-columns: 1fr 450px; gap: 60px; }
+        
+        .sticky-col { position: sticky; top: 100px; height: fit-content; }
+        .preview-car {
+            width: 100%; border-radius: var(--radius);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        .ribbon {
+            background: #fff; padding: 12px 20px; border-radius: 100px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); font-size: 12px; font-weight: 600;
+            display: inline-flex; gap: 8px; margin-bottom: 20px;
+        }
+
+        .option-group { margin-bottom: 40px; }
+        .group-title { font-size: 24px; font-weight: 600; margin-bottom: 20px; }
+        
+        .radio-card {
+            border: 1px solid #d2d2d7; border-radius: 12px; padding: 24px;
+            margin-bottom: 12px; cursor: pointer; transition: 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+            background: #fff;
+        }
+        .radio-card:hover { border-color: #86868b; }
+        .radio-card.selected { border: 2px solid var(--accent); padding: 23px; }
+        .radio-card.selected .price-tag { color: var(--accent); }
+
+        .opt-name { font-weight: 600; font-size: 17px; margin-bottom: 4px; }
+        .opt-desc { font-size: 14px; color: #6e6e73; }
+        .price-tag { font-size: 14px; color: #1d1d1f; }
+
+        /* --- COMPARISON (Grid Style) --- */
+        .compare-section { background: var(--bg-white); color: var(--text-dark); padding: 100px 0; }
+        .compare-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; text-align: center; }
+        
+        .comp-img { width: 100%; height: 200px; object-fit: cover; border-radius: 18px; margin-bottom: 20px; }
+        .comp-title { font-size: 21px; font-weight: 600; margin-bottom: 10px; }
+        .comp-price { font-size: 14px; margin-bottom: 30px; }
+        
+        .spec-row { margin-bottom: 30px; border-top: 1px solid #d2d2d7; padding-top: 20px; }
+        .spec-val { font-size: 24px; font-weight: 600; display: block; margin-bottom: 5px; }
+        .spec-lbl { font-size: 12px; color: #6e6e73; }
+
+        /* Animations */
+        @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } from { opacity: 0; transform: translateY(30px); } }
+        @keyframes zoomIn { to { opacity: 1; transform: scale(1); } from { opacity: 0; transform: scale(0.9); } }
+
+        /* Mobile */
+        @media (max-width: 900px) {
+            .hero h1 { font-size: 48px; }
+            .bento-grid { grid-template-columns: 1fr; grid-template-rows: auto; }
+            .span-2 { grid-column: span 1; }
+            .config-layout { grid-template-columns: 1fr; }
+            .sticky-col { position: static; }
+            .compare-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container nav-inner">
+            <div class="logo">Auto Shadow <span style="opacity: 0.5;">Pro</span></div>
+            <a href="#config" class="btn-buy">Записаться</a>
+        </div>
+    </header>
+
+    <section class="hero">
+        <span class="pro-badge">Детейлинг нового поколения</span>
+        <h1>Glossipossible.</h1>
+        <p>Невероятно глубокий цвет. Абсолютная защита.</p>
+        <div class="hero-img-container"></div>
+    </section>
+
+    <section class="bento-section">
+        <div class="container">
+            <h2 class="section-head text-gradient">Технологии защиты.</h2>
+            
+            <div class="bento-grid">
+                <div class="bento-card span-2">
+                    <img src="https://images.unsplash.com/photo-1617788138017-80ad40651399?q=80&w=2070" class="card-bg">
+                    <div class="card-content">
+                        <div class="card-sub">Полиуретан SunTek</div>
+                        <div class="card-title" style="font-size: 42px;">Невидимый щит.<br>Самовосстановление.</div>
+                    </div>
+                </div>
+
+                <div class="bento-card" style="background: #1d1d1f;">
+                    <div class="card-content flex-center" style="height: 100%; flex-direction: column;">
+                        <div class="card-super">9H</div>
+                        <div class="card-title">Твердость</div>
+                        <div class="card-sub">Керамика Pro</div>
+                    </div>
+                </div>
+
+                <div class="bento-card">
+                    <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=2070" class="card-bg">
+                    <div class="card-content">
+                        <div class="card-title">Гидрофобный эффект</div>
+                        <div class="card-sub">Вода просто исчезает.</div>
+                    </div>
+                </div>
+
+                <div class="bento-card span-2" style="background: #f5f5f7;">
+                    <img src="https://images.unsplash.com/photo-1560243563-062bfc001d68?q=80&w=2070" class="card-bg">
+                    <div class="card-content">
+                        <div class="card-title dark-text" style="font-size: 36px;">Интерьер.<br>Как в день покупки.</div>
+                        <div class="card-sub" style="color: #6e6e73;">Глубокая химчистка и консервация.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="config-section" id="config">
+        <div class="container config-layout">
+            
+            <div class="sticky-col">
+                <div class="ribbon">
+                    <span style="color: #e30000;">New</span>
+                    <span>Пакет 2025 года</span>
+                </div>
+                <h2 style="font-size: 48px; font-weight: 700; line-height: 1.1; margin-bottom: 20px;">
+                    Ваш авто.<br>В идеальном состоянии.
+                </h2>
+                <img src="https://images.unsplash.com/photo-1507136566006-cfc505b114fc?q=80&w=2070" class="preview-car">
+                <p style="margin-top: 20px; font-size: 14px; color: #6e6e73;">
+                    Бесплатная доставка до студии в пределах КАД.<br>
+                    Гарантия на работы от 1 года.
+                </p>
+            </div>
+
+            <div class="options-col">
+                
+                <div class="option-group">
+                    <div class="group-title">Выберите защиту.</div>
+                    
+                    <div class="radio-card" onclick="select(this)">
+                        <div>
+                            <div class="opt-name">Light Restore</div>
+                            <div class="opt-desc">Полировка + Твердый воск</div>
+                        </div>
+                        <div class="price-tag">15 000 ₽</div>
+                    </div>
+
+                    <div class="radio-card selected" onclick="select(this)">
+                        <div>
+                            <div class="opt-name">Ceramic Pro</div>
+                            <div class="opt-desc">Полировка + 2 слоя керамики</div>
+                        </div>
+                        <div class="price-tag">45 000 ₽</div>
+                    </div>
+
+                    <div class="radio-card" onclick="select(this)">
+                        <div>
+                            <div class="opt-name">Armour PPF</div>
+                            <div class="opt-desc">Полная оклейка зоны риска</div>
+                        </div>
+                        <div class="price-tag">85 000 ₽</div>
+                    </div>
+                </div>
+
+                <div class="option-group">
+                    <div class="group-title">Класс автомобиля.</div>
+                    
+                    <div class="radio-card selected" onclick="select(this)">
+                        <div>
+                            <div class="opt-name">Седан</div>
+                            <div class="opt-desc">Стандартный размер</div>
+                        </div>
+                    </div>
+
+                    <div class="radio-card" onclick="select(this)">
+                        <div>
+                            <div class="opt-name">Внедорожник</div>
+                            <div class="opt-desc">Повышенный расход материалов</div>
+                        </div>
+                        <div class="price-tag">+20%</div>
+                    </div>
+                </div>
+
+                <div style="background: #e8e8ed; padding: 30px; border-radius: 18px; text-align: center;">
+                    <div style="font-size: 32px; font-weight: 600; margin-bottom: 15px;">45 000 ₽</div>
+                    <a href="#" class="btn-buy" style="padding: 15px 40px; font-size: 17px; display: inline-block;">Оформить заявку</a>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section class="compare-section">
+        <div class="container">
+            <h2 style="font-size: 40px; font-weight: 600; text-align: center; margin-bottom: 60px;">Какую защиту выбрать?</h2>
+            
+            <div class="compare-grid">
+                <div>
+                    <img src="https://images.unsplash.com/photo-1552519507-da3b142c6e3d?q=80&w=800" class="comp-img">
+                    <div class="comp-title">Воск</div>
+                    <div class="comp-price">От 5 000 ₽</div>
+                    <div class="spec-row">
+                        <span class="spec-val">3 мес.</span>
+                        <span class="spec-lbl">Срок службы</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-val">Базовый</span>
+                        <span class="spec-lbl">Блеск</span>
+                    </div>
+                </div>
+
+                <div>
+                    <img src="https://images.unsplash.com/photo-1493238792000-8113da705763?q=80&w=800" class="comp-img">
+                    <div class="comp-title">Керамика</div>
+                    <div class="comp-price">От 25 000 ₽</div>
+                    <div class="spec-row">
+                        <span class="spec-val">2 года</span>
+                        <span class="spec-lbl">Срок службы</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-val">Зеркальный</span>
+                        <span class="spec-lbl">Блеск</span>
+                    </div>
+                </div>
+
+                <div>
+                    <img src="https://images.unsplash.com/photo-1635783307289-4a949e29547d?q=80&w=800" class="comp-img">
+                    <div class="comp-title">Пленка (PPF)</div>
+                    <div class="comp-price">От 85 000 ₽</div>
+                    <div class="spec-row">
+                        <span class="spec-val">7 лет</span>
+                        <span class="spec-lbl">Срок службы</span>
+                    </div>
+                    <div class="spec-row">
+                        <span class="spec-val">Броня</span>
+                        <span class="spec-lbl">Защита от сколов</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer style="background: #f5f5f7; padding: 40px 0; text-align: center; font-size: 12px; color: #86868b; border-top: 1px solid #d2d2d7;">
+        <div class="container">
+            <p>Copyright © 2025 Auto Shadow Pro. Санкт-Петербург.</p>
+        </div>
+    </footer>
+
+    <script>
+        function select(el) {
+            let siblings = el.parentElement.querySelectorAll('.radio-card');
+            siblings.forEach(s => s.classList.remove('selected'));
+            el.classList.add('selected');
+        }
+    </script>
+</body>
+</html>
